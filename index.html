@@ -1,96 +1,105 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>纪念日 - DayMaster</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-</head>
-<body>
-  <div class="stars" id="stars"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>纪念日 - DayMaster</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="stars" id="stars"></div>
 
-  <header>
-    <div class="header-content">
-      <div class="logo">
-        <span class="logo-icon">&#x1F31F;</span>
-        <h1>纪念日</h1>
-      </div>
-      <div class="header-actions">
-        <button class="theme-toggle" id="themeToggle" title="切换主题">&#x1F319;</button>
-        <button class="btn-add" id="btnAdd">+ 新增纪念日</button>
-      </div>
-    </div>
-    <p class="subtitle">记录生命中每一个值得纪念的日子</p>
-  </header>
-
-  <main>
-    <div class="events-container" id="eventsContainer">
-      <div class="empty-state" id="emptyState">
-        <div class="empty-icon">&#x1F4C5;</div>
-        <h3>还没有纪念日</h3>
-        <p>点击右上角的按钮添加你的第一个纪念日吧</p>
-      </div>
-    </div>
-  </main>
-
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal" id="modal">
-      <div class="modal-header">
-        <h2 id="modalTitle">添加纪念日</h2>
-        <button class="modal-close" id="modalClose">&times;</button>
-      </div>
-      <form id="eventForm">
-        <input type="hidden" id="editId" value="">
-        <div class="form-group">
-          <label for="eventName">纪念日名称</label>
-          <input type="text" id="eventName" placeholder="例如：在一起的纪念日" required>
+    <header>
+      <div class="header-content">
+        <div class="logo">
+          <span class="logo-icon">&#x1F31F;</span>
+          <h1>纪念日</h1>
         </div>
-        <div class="form-group">
-          <label for="eventEmoji">图标（Emoji）</label>
-          <div class="emoji-picker" id="emojiPicker">
-            <span class="emoji-option selected" data-emoji="&#x2764;&#xFE0F;">&#x2764;&#xFE0F;</span>
-            <span class="emoji-option" data-emoji="&#x1F496;">&#x1F496;</span>
-            <span class="emoji-option" data-emoji="&#x1F490;">&#x1F490;</span>
-            <span class="emoji-option" data-emoji="&#x1F382;">&#x1F382;</span>
-            <span class="emoji-option" data-emoji="&#x1F389;">&#x1F389;</span>
-            <span class="emoji-option" data-emoji="&#x1F31F;">&#x1F31F;</span>
-            <span class="emoji-option" data-emoji="&#x1F4DA;">&#x1F4DA;</span>
-            <span class="emoji-option" data-emoji="&#x1F3C6;">&#x1F3C6;</span>
-            <span class="emoji-option" data-emoji="&#x1F3AF;">&#x1F3AF;</span>
-            <span class="emoji-option" data-emoji="&#x1F30D;">&#x1F30D;</span>
-            <span class="emoji-option" data-emoji="&#x1F4AA;">&#x1F4AA;</span>
-            <span class="emoji-option" data-emoji="&#x1F525;">&#x1F525;</span>
-            <span class="emoji-option" data-emoji="&#x1F31E;">&#x1F31E;</span>
-            <span class="emoji-option" data-emoji="&#x1F4BC;">&#x1F4BC;</span>
-            <span class="emoji-option" data-emoji="&#x1F3E0;">&#x1F3E0;</span>
+        <div class="header-actions">
+          <button class="theme-toggle" id="themeToggle" title="切换主题">&#x1F319;</button>
+          <button class="btn-add" id="btnAdd">+ 新增纪念日</button>
+        </div>
+      </div>
+      <p class="subtitle">记录生命中每一个值得纪念的日子</p>
+    </header>
+
+    <main>
+      <div class="events-container" id="eventsContainer">
+        <div class="empty-state" id="emptyState">
+          <div class="empty-icon">&#x1F4C5;</div>
+          <h3>还没有纪念日</h3>
+          <p>点击右上角的按钮添加你的第一个纪念日吧</p>
+        </div>
+      </div>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal" id="modal">
+        <div class="modal-header">
+          <h2 id="modalTitle">添加纪念日</h2>
+          <button class="modal-close" id="modalClose">&times;</button>
+        </div>
+        <form id="eventForm">
+          <input type="hidden" id="editId" value="" />
+          <div class="form-group">
+            <label for="eventName">纪念日名称</label>
+            <input type="text" id="eventName" placeholder="例如：在一起的纪念日" required />
           </div>
-        </div>
-        <div class="form-group">
-          <label for="eventDate">日期</label>
-          <input type="date" id="eventDate" required>
-        </div>
-        <div class="form-group">
-          <label for="eventColor">主题色</label>
-          <div class="color-picker" id="colorPicker">
-            <span class="color-option selected" data-color="#ff6b9d" style="background:#ff6b9d"></span>
-            <span class="color-option" data-color="#ff9a56" style="background:#ff9a56"></span>
-            <span class="color-option" data-color="#ffd93d" style="background:#ffd93d"></span>
-            <span class="color-option" data-color="#6bcb77" style="background:#6bcb77"></span>
-            <span class="color-option" data-color="#4d96ff" style="background:#4d96ff"></span>
-            <span class="color-option" data-color="#9b59b6" style="background:#9b59b6"></span>
-            <span class="color-option" data-color="#1abc9c" style="background:#1abc9c"></span>
-            <span class="color-option" data-color="#e74c3c" style="background:#e74c3c"></span>
+          <div class="form-group">
+            <label for="eventEmoji">图标（Emoji）</label>
+            <div class="emoji-picker" id="emojiPicker">
+              <span class="emoji-option selected" data-emoji="&#x2764;&#xFE0F;"
+                >&#x2764;&#xFE0F;</span
+              >
+              <span class="emoji-option" data-emoji="&#x1F496;">&#x1F496;</span>
+              <span class="emoji-option" data-emoji="&#x1F490;">&#x1F490;</span>
+              <span class="emoji-option" data-emoji="&#x1F382;">&#x1F382;</span>
+              <span class="emoji-option" data-emoji="&#x1F389;">&#x1F389;</span>
+              <span class="emoji-option" data-emoji="&#x1F31F;">&#x1F31F;</span>
+              <span class="emoji-option" data-emoji="&#x1F4DA;">&#x1F4DA;</span>
+              <span class="emoji-option" data-emoji="&#x1F3C6;">&#x1F3C6;</span>
+              <span class="emoji-option" data-emoji="&#x1F3AF;">&#x1F3AF;</span>
+              <span class="emoji-option" data-emoji="&#x1F30D;">&#x1F30D;</span>
+              <span class="emoji-option" data-emoji="&#x1F4AA;">&#x1F4AA;</span>
+              <span class="emoji-option" data-emoji="&#x1F525;">&#x1F525;</span>
+              <span class="emoji-option" data-emoji="&#x1F31E;">&#x1F31E;</span>
+              <span class="emoji-option" data-emoji="&#x1F4BC;">&#x1F4BC;</span>
+              <span class="emoji-option" data-emoji="&#x1F3E0;">&#x1F3E0;</span>
+            </div>
           </div>
-        </div>
-        <button type="submit" class="btn-submit" id="btnSubmit">保存</button>
-      </form>
+          <div class="form-group">
+            <label for="eventDate">日期</label>
+            <input type="date" id="eventDate" required />
+          </div>
+          <div class="form-group">
+            <label for="eventColor">主题色</label>
+            <div class="color-picker" id="colorPicker">
+              <span
+                class="color-option selected"
+                data-color="#ff6b9d"
+                style="background: #ff6b9d"
+              ></span>
+              <span class="color-option" data-color="#ff9a56" style="background: #ff9a56"></span>
+              <span class="color-option" data-color="#ffd93d" style="background: #ffd93d"></span>
+              <span class="color-option" data-color="#6bcb77" style="background: #6bcb77"></span>
+              <span class="color-option" data-color="#4d96ff" style="background: #4d96ff"></span>
+              <span class="color-option" data-color="#9b59b6" style="background: #9b59b6"></span>
+              <span class="color-option" data-color="#1abc9c" style="background: #1abc9c"></span>
+              <span class="color-option" data-color="#e74c3c" style="background: #e74c3c"></span>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit" id="btnSubmit">保存</button>
+        </form>
+      </div>
     </div>
-  </div>
 
-  <div class="toast" id="toast"></div>
+    <div class="toast" id="toast"></div>
 
-  <script src="js/script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>

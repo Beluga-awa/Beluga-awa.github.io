@@ -1,9 +1,15 @@
-const MILESTONES = [100, 200, 300, 365, 500, 521, 666, 777, 888, 999, 1000, 1314, 2000, 2099, 3000, 3650, 5000, 10000];
+const MILESTONES = [
+  100, 200, 300, 365, 500, 521, 666, 777, 888, 999, 1000, 1314, 2000, 2099, 3000, 3650, 5000, 10000,
+];
 
 const DEFAULT_EVENTS = [
-  { id: 'default1', name: '在一起的纪念日', emoji: '\u2764\uFE0F', date: '2023-09-01', color: '#ff6b9d' },
-  { id: 'default2', name: '她的生日', emoji: '\uD83C\uDF82', date: '2024-03-15', color: '#ffd93d' },
-  { id: 'default3', name: '来到这个世界', emoji: '\uD83C\uDF1F', date: '2024-06-06', color: '#4d96ff' },
+  {
+    id: 'default1',
+    name: 'Lyc & Cg 成为朋友已经',
+    emoji: '\u2764\uFE0F',
+    date: '2025-04-12',
+    color: '#ff6b9d',
+  },
 ];
 
 let events = [];
@@ -51,9 +57,9 @@ function generateStars() {
     star.className = 'star';
     star.style.left = Math.random() * 100 + '%';
     star.style.top = Math.random() * 100 + '%';
-    star.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
+    star.style.setProperty('--duration', 2 + Math.random() * 4 + 's');
     star.style.animationDelay = Math.random() * 4 + 's';
-    star.style.width = star.style.height = (1 + Math.random() * 2) + 'px';
+    star.style.width = star.style.height = 1 + Math.random() * 2 + 'px';
     container.appendChild(star);
   }
 }
@@ -71,18 +77,19 @@ function renderEvents() {
 
   events.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  container.innerHTML = events.map(event => {
-    const days = getDaysSince(event.date);
-    const next = getNextMilestone(days);
-    const progress = next ? ((days / next) * 100) : 100;
+  container.innerHTML = events
+    .map((event) => {
+      const days = getDaysSince(event.date);
+      const next = getNextMilestone(days);
+      const progress = next ? (days / next) * 100 : 100;
 
-    let milestonesHtml = '';
-    MILESTONES.slice(0, 12).forEach(m => {
-      const reached = days >= m;
-      milestonesHtml += `<span class="milestone-dot ${reached ? 'reached' : ''}" title="${m}天" style="${reached ? `--card-color: ${event.color}; --card-color-rgb: ${hexToRgb(event.color)}` : ''}">${m < 1000 ? Math.floor(m / 100) : Math.floor(m / 1000) + 'k'}</span>`;
-    });
+      let milestonesHtml = '';
+      MILESTONES.slice(0, 12).forEach((m) => {
+        const reached = days >= m;
+        milestonesHtml += `<span class="milestone-dot ${reached ? 'reached' : ''}" title="${m}天" style="${reached ? `--card-color: ${event.color}; --card-color-rgb: ${hexToRgb(event.color)}` : ''}">${m < 1000 ? Math.floor(m / 100) : Math.floor(m / 1000) + 'k'}</span>`;
+      });
 
-    return `
+      return `
       <div class="event-card" data-id="${event.id}" style="--card-color: ${event.color}; --card-color-secondary: ${adjustColor(event.color, 20)}">
         <div class="card-glow" style="background: radial-gradient(circle, ${event.color}, transparent);"></div>
         <div class="card-header">
@@ -102,7 +109,9 @@ function renderEvents() {
           <div class="days-number">${days}</div>
           <div class="days-label">天已经过去</div>
         </div>
-        ${next ? `
+        ${
+          next
+            ? `
         <div class="card-progress">
           <div class="progress-info">
             <span>距离 ${next} 天</span>
@@ -111,13 +120,16 @@ function renderEvents() {
           <div class="progress-bar">
             <div class="progress-fill" style="width: ${Math.min(progress, 100)}%"></div>
           </div>
-        </div>` : ''}
+        </div>`
+            : ''
+        }
         <div class="card-milestones">
           ${milestonesHtml}
         </div>
       </div>
     `;
-  }).join('');
+    })
+    .join('');
 
   animateCards();
 }
@@ -147,9 +159,9 @@ function adjustColor(hex, percent) {
   const num = parseInt(hex.replace('#', ''), 16);
   const amt = Math.round(2.55 * percent);
   const R = Math.min(255, Math.max(0, (num >> 16) + amt));
-  const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amt));
-  const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
-  return `#${(1 << 24 | R << 16 | G << 8 | B).toString(16).slice(1)}`;
+  const G = Math.min(255, Math.max(0, ((num >> 8) & 0x00ff) + amt));
+  const B = Math.min(255, Math.max(0, (num & 0x0000ff) + amt));
+  return `#${((1 << 24) | (R << 16) | (G << 8) | B).toString(16).slice(1)}`;
 }
 
 function showToast(message) {
@@ -169,10 +181,10 @@ function openModal(eventData) {
     document.getElementById('editId').value = eventData.id;
     document.getElementById('eventName').value = eventData.name;
     document.getElementById('eventDate').value = eventData.date;
-    document.querySelectorAll('.emoji-option').forEach(el => {
+    document.querySelectorAll('.emoji-option').forEach((el) => {
       el.classList.toggle('selected', el.dataset.emoji === eventData.emoji);
     });
-    document.querySelectorAll('.color-option').forEach(el => {
+    document.querySelectorAll('.color-option').forEach((el) => {
       el.classList.toggle('selected', el.dataset.color === eventData.color);
     });
     document.getElementById('btnSubmit').textContent = '更新';
@@ -197,13 +209,13 @@ function addEvent() {
 }
 
 function editEvent(id) {
-  const event = events.find(e => e.id === id);
+  const event = events.find((e) => e.id === id);
   if (event) openModal(event);
 }
 
 function deleteEvent(id) {
   if (!confirm('确定要删除这个纪念日吗？')) return;
-  events = events.filter(e => e.id !== id);
+  events = events.filter((e) => e.id !== id);
   saveEvents();
   renderEvents();
   showToast('已删除纪念日');
@@ -215,16 +227,16 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-document.querySelectorAll('.emoji-option').forEach(el => {
+document.querySelectorAll('.emoji-option').forEach((el) => {
   el.addEventListener('click', () => {
-    document.querySelectorAll('.emoji-option').forEach(e => e.classList.remove('selected'));
+    document.querySelectorAll('.emoji-option').forEach((e) => e.classList.remove('selected'));
     el.classList.add('selected');
   });
 });
 
-document.querySelectorAll('.color-option').forEach(el => {
+document.querySelectorAll('.color-option').forEach((el) => {
   el.addEventListener('click', () => {
-    document.querySelectorAll('.color-option').forEach(e => e.classList.remove('selected'));
+    document.querySelectorAll('.color-option').forEach((e) => e.classList.remove('selected'));
     el.classList.add('selected');
   });
 });
@@ -234,8 +246,10 @@ document.getElementById('eventForm').addEventListener('submit', (e) => {
   const editId = document.getElementById('editId').value;
   const name = document.getElementById('eventName').value.trim();
   const date = document.getElementById('eventDate').value;
-  const emoji = document.querySelector('.emoji-picker .emoji-option.selected')?.dataset.emoji || '\u2764\uFE0F';
-  const color = document.querySelector('.color-picker .color-option.selected')?.dataset.color || '#ff6b9d';
+  const emoji =
+    document.querySelector('.emoji-picker .emoji-option.selected')?.dataset.emoji || '\u2764\uFE0F';
+  const color =
+    document.querySelector('.color-picker .color-option.selected')?.dataset.color || '#ff6b9d';
 
   if (!name || !date) {
     showToast('请填写完整信息');
@@ -243,7 +257,7 @@ document.getElementById('eventForm').addEventListener('submit', (e) => {
   }
 
   if (editId) {
-    const idx = events.findIndex(e => e.id === editId);
+    const idx = events.findIndex((e) => e.id === editId);
     if (idx !== -1) {
       events[idx] = { ...events[idx], name, date, emoji, color };
       showToast('已更新纪念日');
@@ -254,7 +268,7 @@ document.getElementById('eventForm').addEventListener('submit', (e) => {
       name,
       date,
       emoji,
-      color
+      color,
     };
     events.push(newEvent);
     showToast('已添加纪念日');
@@ -270,14 +284,16 @@ document.getElementById('themeToggle').addEventListener('click', () => {
   const current = html.getAttribute('data-theme') || 'dark';
   const next = current === 'dark' ? 'light' : 'dark';
   html.setAttribute('data-theme', next);
-  document.getElementById('themeToggle').textContent = next === 'dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
+  document.getElementById('themeToggle').textContent =
+    next === 'dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
   localStorage.setItem('daymaster_theme', next);
 });
 
 function initTheme() {
   const saved = localStorage.getItem('daymaster_theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
-  document.getElementById('themeToggle').textContent = saved === 'dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
+  document.getElementById('themeToggle').textContent =
+    saved === 'dark' ? '\uD83C\uDF19' : '\u2600\uFE0F';
 }
 
 document.addEventListener('keydown', (e) => {
