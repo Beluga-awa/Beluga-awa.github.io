@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="theme-dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=yes">
+  <meta name="description" content="Lyc & Cg 友谊纪念日 — 始于2025年4月12日，时光记录，反主流手绘美学">
+  <title>Lyc & Cg · 友谊纪年</title>
+  <style>
+    /* ===== 主题变量（深色/浅色）====== */
+    .theme-dark {
+      --bg-deep: #1a1817;
+      --bg-surface: #211f1d;
+      --text-warm: #efe8e1;
+      --text-muted: #9e958b;
+      --accent-orange: #f0824b;
+      --accent-glow: #f59a6c;
+      --accent-subtle: #c46a3c;
+      --noise-opacity: 0.04;
+      --noise-blend: overlay;
+      --progress-bg: rgba(255, 255, 255, 0.06);
+      --panel-bg: #252220;
+      --panel-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      --doodle-opacity: 0.5;
+      --cursor-glow-bg: radial-gradient(circle, rgba(240,130,75,0.06) 0%, rgba(240,130,75,0.02) 35%, transparent 70%);
+      --font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    .theme-light {
+      --bg-deep: #f9f6f1;
+      --bg-surface: #eae3d8;
+      --text-warm: #2c2416;
+      --text-muted: #6b5e4f;
+      --accent-orange: #c55a2c;
+      --accent-glow: #d97a4a;
+      --accent-subtle: #a34926;
+      --noise-opacity: 0.07;
+      --noise-blend: multiply;
+      --progress-bg: rgba(0,0,0,0.05);
+      --panel-bg: #f2ede5;
+      --panel-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      --doodle-opacity: 0.4;
+      --cursor-glow-bg: radial-gradient(circle, rgba(197,90,44,0.08) 0%, rgba(197,90,44,0.03) 35%, transparent 70%);
+      --font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* 背景纹理 + 主题强绑定（深/浅分别定义，彻底修复切换bug） */
+    /* 深邃夜空 */
+    body.bg-deep.theme-dark { background: radial-gradient(ellipse at 55% 40%, #211e1c 0%, #161412 65%, #11100e 100%); }
+    body.bg-deep.theme-light { background: radial-gradient(ellipse at 55% 40%, #e7dfd1 0%, #d9cfbc 70%, #c4b9a3 100%); }
+    /* 晨雾 */
+    body.bg-mist.theme-dark { background: radial-gradient(ellipse at 60% 35%, #2f2b27 0%, #231f1b 65%, #1b1714 100%); }
+    body.bg-mist.theme-light { background: radial-gradient(ellipse at 60% 35%, #f5efe7 0%, #ece1d4 70%, #dccdb9 100%); }
+    /* 墨迹 */
+    body.bg-ink.theme-dark { background: radial-gradient(ellipse at 45% 45%, #2a2520 0%, #1e1b17 60%, #141210 100%); }
+    body.bg-ink.theme-light { background: radial-gradient(ellipse at 45% 45%, #dad1c4 0%, #c9beb0 70%, #b7aa9a 100%); }
+    /* 星砂 */
+    body.bg-stars.theme-dark { background: radial-gradient(ellipse at 50% 40%, #27221e 0%, #1a1613 70%, #0f0d0b 100%); }
+    body.bg-stars.theme-light { background: radial-gradient(ellipse at 50% 40%, #f2ede5 0%, #e3d9cf 70%, #cfc3b6 100%); }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { font-size:16px; -webkit-font-smoothing:antialiased; }
+    body {
+      font-family: var(--font-family);
+      min-height: 100vh; min-height: 100dvh;
+      color: var(--text-warm);
+      overflow-x: hidden;
+      position: relative;
+      cursor: default;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: background 0.4s cubic-bezier(0.22, 1, 0.36, 1), color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* 噪点纹理 (保留灵魂) */
+    .noise-overlay {
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      pointer-events: none; z-index: 9999;
+      opacity: var(--noise-opacity);
+      mix-blend-mode: var(--noise-blend);
+    }
+    .noise-overlay svg { width:100%; height:100%; }
+
+    /* 粒子层 */
+    .particles-stage { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+    .particle { position:absolute; border-radius:50%; will-change:transform, opacity; }
+    .particle--warm { background: var(--accent-orange); box-shadow: 0 0 6px 2px rgba(240,130,75,0.45), 0 0 18px 6px rgba(240,130,75,0.15); }
+    .particle--pale { background: #f5e6d8; box-shadow: 0 0 4px 1px rgba(245,230,216,0.4), 0 0 12px 4px rgba(245,230,216,0.1); }
+
+    @keyframes driftA { 0%{transform:translate(0,0) scale(1); opacity:0.5;} 18%{transform:translate(28px,-52px) scale(1.3); opacity:0.75;} 36%{transform:translate(-14px,-96px) scale(0.75); opacity:0.3;} 54%{transform:translate(-38px,-48px) scale(1.15); opacity:0.6;} 72%{transform:translate(10px,-18px) scale(0.9); opacity:0.45;} 100%{transform:translate(0,0) scale(1); opacity:0.5;} }
+    @keyframes driftB { 0%{transform:translate(0,0) scale(1); opacity:0.35;} 22%{transform:translate(-32px,-44px) scale(1.35); opacity:0.65;} 44%{transform:translate(20px,-88px) scale(0.7); opacity:0.25;} 66%{transform:translate(36px,-36px) scale(1.2); opacity:0.55;} 88%{transform:translate(-8px,-10px) scale(0.85); opacity:0.4;} 100%{transform:translate(0,0) scale(1); opacity:0.35;} }
+    @keyframes driftC { 0%{transform:translate(0,0) scale(1); opacity:0.45;} 20%{transform:translate(18px,-60px) scale(1.25); opacity:0.7;} 40%{transform:translate(-22px,-105px) scale(0.8); opacity:0.35;} 60%{transform:translate(-30px,-55px) scale(1.1); opacity:0.55;} 80%{transform:translate(15px,-22px) scale(0.9); opacity:0.45;} 100%{transform:translate(0,0) scale(1); opacity:0.45;} }
+
+    /* 主网格布局 */
+    .main-stage {
+      position:relative; z-index:10; min-height:100vh; min-height:100dvh;
+      display:grid; grid-template-columns:1fr 1.6fr 0.4fr; grid-template-rows:1fr 2fr 0.8fr;
+      grid-template-areas:". . ." ". content ." ". . .";
+      padding: clamp(16px,3vw,40px);
+    }
+    @media (max-width:768px) {
+      .main-stage { grid-template-columns:0.2fr 1fr 0.2fr; grid-template-rows:0.6fr 1.5fr 0.6fr; padding:12px 8px; }
+    }
+    .content-area { grid-area:content; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:clamp(10px,2.2vh,24px); padding-left:clamp(0px,2vw,20px); }
+
+    /* 日期标签 */
+    .date-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:clamp(0.8rem,1.4vw,0.95rem); color:var(--text-muted);
+      letter-spacing:0.06em; padding-left:4px;
+      animation: fadeSlideIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.15s both;
+    }
+    .date-tag::before {
+      content:''; display:inline-block; width:7px; height:7px; border-radius:50%;
+      background: var(--accent-orange); box-shadow:0 0 8px 2px rgba(240,130,75,0.5);
+      animation: pulse-dot 3.2s cubic-bezier(0.4,0,0.2,1) infinite;
+    }
+    @keyframes pulse-dot { 0%,100%{box-shadow:0 0 8px 2px rgba(240,130,75,0.4); transform:scale(1);} 40%{box-shadow:0 0 16px 6px rgba(240,130,75,0.7); transform:scale(1.55);} 70%{box-shadow:0 0 6px 1px rgba(240,130,75,0.3); transform:scale(0.85);} }
+
+    .number-zone { 
+      position:relative; display:flex; align-items:baseline; gap:clamp(6px,1.2vw,14px); flex-wrap:wrap; 
+      animation: fadeSlideIn 1s cubic-bezier(0.34,1.56,0.64,1) 0.25s both; 
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .number-zone:active { transform: scale(0.97); }
+    
+    .big-number {
+      font-size: clamp(68px,14vw,150px); font-weight:800; letter-spacing:-0.03em; line-height:0.9;
+      color: var(--text-warm);
+      text-shadow:0 0 50px rgba(240,130,75,0.2), 0 0 120px rgba(240,130,75,0.06), 0 2px 4px rgba(0,0,0,0.5);
+      transition:text-shadow 0.7s cubic-bezier(0.22,1,0.36,1);
+      white-space: nowrap;
+    }
+    .big-number:hover { text-shadow:0 0 65px rgba(240,130,75,0.4), 0 0 150px rgba(240,130,75,0.15), 0 2px 4px rgba(0,0,0,0.5); }
+    
+    .unit-label { 
+      font-size:clamp(16px,3.2vw,34px); font-weight:500; letter-spacing:0.04em; color:var(--text-muted); 
+      position:relative; top:-0.15em; 
+      animation: fadeSlideIn 1s cubic-bezier(0.34,1.56,0.64,1) 0.4s both; 
+    }
+
+    /* 光学动画 */
+    .number-refreshed .big-number, .number-refreshed .unit-label {
+      animation: optic-fade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @keyframes optic-fade {
+      0% { filter: blur(0px); transform: translateY(0) scale(1); opacity: 1; }
+      40% { filter: blur(12px); transform: translateY(-8px) scale(0.98); opacity: 0; }
+      50% { filter: blur(12px); transform: translateY(8px) scale(0.98); opacity: 0; }
+      100% { filter: blur(0px); transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    @keyframes fadeSlideIn { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+
+    .hand-underline { position:absolute; bottom:-8px; left:-4px; width:calc(100% + 18px); height:14px; pointer-events:none; animation: fadeSlideIn 1s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
+    .hand-underline svg { width:100%; height:100%; }
+    .hand-underline path { fill:none; stroke:var(--accent-orange); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; opacity:0.7; stroke-dasharray:3 1.5; animation: sketch-dash 0.7s cubic-bezier(0.25,0.1,0.25,1) 0.7s both; }
+    @keyframes sketch-dash { from { stroke-dashoffset:60; opacity:0; } to { stroke-dashoffset:0; opacity:0.7; } }
+
+    .meta-info { display:flex; flex-direction:column; gap:4px; animation: fadeSlideIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+    .meta-names { font-size:clamp(1rem,1.8vw,1.3rem); font-weight:600; letter-spacing:0.05em; color:var(--text-warm); }
+    .meta-names .ampersand { color:var(--accent-orange); font-style:italic; font-weight:700; margin:0 2px; }
+
+    /* 进度条区域 */
+    .progress-container { width:100%; max-width:380px; margin-top:4px; animation: fadeSlideIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+    .progress-label { font-size:0.8rem; color:var(--text-muted); margin-bottom:4px; display:flex; justify-content:space-between; align-items: center; }
+    #progressText { 
+      transition: opacity 0.3s cubic-bezier(0.22,1,0.36,1), transform 0.3s cubic-bezier(0.22,1,0.36,1);
+      display: inline-block;
+      min-width: 180px;
+    }
+    .progress-bar-outer { width:100%; height:8px; background:var(--progress-bg); border-radius:20px; overflow:hidden; position:relative; }
+    .progress-bar-inner { height:100%; background:var(--accent-orange); width:0%; border-radius:20px; position:relative; transition: width 0.8s cubic-bezier(0.22,1,0.36,1); box-shadow:0 0 12px rgba(240,130,75,0.4); }
+    .milestone-alert { margin-top:8px; font-size:0.9rem; color:var(--accent-orange); background:rgba(240,130,75,0.08); padding:6px 12px; border-radius:20px; display:inline-block; animation: fadeSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+
+    /* 手绘装饰 */
+    .doodle-container { position:fixed; pointer-events:none; z-index:5; opacity:var(--doodle-opacity); animation: doodle-appear 1.4s cubic-bezier(0.22,1,0.36,1) 0.8s both; }
+    @keyframes doodle-appear { from{opacity:0; transform:scale(0.85);} to{opacity:var(--doodle-opacity); transform:scale(1);} }
+    .doodle-container--top-left { top:clamp(30px,8vh,80px); left:clamp(20px,6vw,70px); width:clamp(60px,10vw,130px); height:clamp(60px,10vw,130px); }
+    .doodle-container--bottom-right { bottom:clamp(40px,10vh,100px); right:clamp(30px,8vw,90px); width:clamp(50px,8vw,100px); height:clamp(50px,8vw,100px); }
+    .doodle-container--mid-left { top:55%; left:clamp(10px,3vw,40px); width:clamp(40px,6vw,75px); height:clamp(40px,6vw,75px); opacity:0.35; }
+    .doodle-line { fill:none; stroke:var(--accent-subtle); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; opacity:0.6; }
+    .doodle-fill-warm { fill:rgba(240,130,75,0.06); stroke:var(--accent-orange); stroke-width:1.6; }
+
+    /* 鼠标光晕 */
+    .cursor-glow { position:fixed; pointer-events:none; z-index:0; width:280px; height:280px; border-radius:50%; background:var(--cursor-glow-bg); transform:translate(-50%,-50%); will-change:left,top; transition:left 0.35s cubic-bezier(0.22,1,0.36,1), top 0.35s cubic-bezier(0.22,1,0.36,1); opacity:0; }
+    body:hover .cursor-glow { opacity:1; }
+    @media (max-width:768px) { .cursor-glow { display:none; } }
+
+    /* 工具栏 & 设置 */
+    .toolbar { position:fixed; top:20px; right:20px; z-index:100; display:flex; gap:12px; }
+    .icon-btn { width:44px; height:44px; border-radius:50%; background:var(--bg-surface); border:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; justify-content:center; cursor:pointer; transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), background 0.3s; backdrop-filter:blur(6px); }
+    .icon-btn svg { width:20px; height:20px; fill:none; stroke:var(--text-warm); stroke-width:1.8; }
+    .icon-btn:hover { transform:scale(1.08); background:var(--accent-orange); border-color:var(--accent-orange); }
+    .icon-btn:active { transform:scale(0.95); }
+
+    .settings-panel {
+      position:fixed; top:0; right:-320px; width:300px; height:100vh; height:100dvh;
+      background:var(--panel-bg); z-index:200; box-shadow:var(--panel-shadow);
+      padding:24px 20px; display:flex; flex-direction:column; gap:20px;
+      transition: right 0.5s cubic-bezier(0.22,1,0.36,1);
+      overflow-y:auto;
+    }
+    .settings-panel.open { right:0; }
+    .panel-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.3); z-index:150; opacity:0; pointer-events:none; transition: opacity 0.4s cubic-bezier(0.22,1,0.36,1); }
+    .panel-backdrop.active { opacity:1; pointer-events:auto; }
+    .panel-title { font-size:1.2rem; font-weight:600; color:var(--text-warm); margin-bottom:8px; }
+    .option-group { display:flex; flex-direction:column; gap:10px; }
+    .option-label { font-size:0.85rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .option-row { display:flex; flex-wrap:wrap; gap:8px; }
+    .option-chip {
+      padding:8px 14px; border-radius:24px; font-size:0.85rem; cursor:pointer;
+      background:var(--progress-bg); color:var(--text-warm); border:1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    .option-chip.active { background:var(--accent-orange); color:#fff; border-color:var(--accent-orange); }
+    .close-panel { align-self:flex-end; background:none; border:none; color:var(--text-muted); font-size:1.4rem; cursor:pointer; }
+
+    @media (max-width:600px) {
+      .toolbar { top:12px; right:12px; gap:8px; }
+      .settings-panel { width:85vw; right:-85vw; }
+    }
+    .mode-hint { position: absolute; bottom: -30px; left: 0; font-size: 0.7rem; color: var(--text-muted); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .number-zone:hover .mode-hint { opacity: 0.8; }
+  </style>
+</head>
+<body class="bg-deep theme-dark">
+  <div class="noise-overlay" aria-hidden="true">
+    <svg viewBox="0 0 300 300" preserveAspectRatio="none"><filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="4"/><feColorMatrix type="saturate" values="0"/></filter><rect width="300" height="300" filter="url(#grain)" opacity="0.8"/></svg>
+  </div>
+  <div class="cursor-glow" id="cursorGlow"></div>
+  <div class="particles-stage" id="particlesStage"></div>
+
+  <div class="doodle-container doodle-container--top-left"><svg viewBox="0 0 100 100"><path class="doodle-line" d="M50 8C72 6 92 20 91 44C90 64 76 82 54 88C36 92 16 80 12 58C8 38 18 16 36 10C44 7 40 9 50 8Z"/><circle cx="44" cy="38" r="3.5" fill="rgba(240,130,75,0.4)"/><circle cx="60" cy="52" r="2.8" fill="rgba(240,130,75,0.3)"/></svg></div>
+  <div class="doodle-container doodle-container--bottom-right"><svg viewBox="0 0 100 100"><circle cx="32" cy="28" r="10" class="doodle-fill-warm"/><path class="doodle-line" d="M32 38Q28 55 22 72"/><path class="doodle-line" d="M32 38Q36 55 42 72"/><circle cx="66" cy="34" r="9" class="doodle-fill-warm"/><path class="doodle-line" d="M66 43Q62 58 56 74"/><path class="doodle-line" d="M66 43Q70 58 76 74"/></svg></div>
+  <div class="doodle-container doodle-container--mid-left"><svg viewBox="0 0 80 80"><path class="doodle-line" d="M20 10Q50 8 62 22Q72 34 64 52Q54 68 34 70Q16 68 10 48Q6 30 20 10Z"/></svg></div>
+
+  <main class="main-stage">
+    <div class="content-area">
+      <div class="date-tag"><span>始于 2025.04.12</span></div>
+      
+      <div class="number-zone" id="numberZone" title="点击切换显示单位">
+        <span class="big-number" id="daysCount">--</span>
+        <span class="unit-label" id="unitLabel">天</span>
+        <div class="hand-underline"><svg viewBox="0 0 200 16" preserveAspectRatio="none"><path d="M4 7Q28 2 52 8Q78 14 98 6Q118 0 142 9Q166 15 188 5Q196 3 198 6"/></svg></div>
+        <span class="mode-hint"></span>
+      </div>
+      
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-label">
+          <span id="progressText">共赴岁月</span>
+          <span id="progressPercent">0%</span>
+        </div>
+        <div class="progress-bar-outer"><div class="progress-bar-inner" id="progressBar" style="width:0%"></div></div>
+        <div class="milestone-alert" id="milestoneAlert" style="display:none;"></div>
+      </div>
+      
+      <div class="meta-info">
+        <p class="meta-names">Lyc<span class="ampersand">&</span>Cg</p>
+        <p style="font-size:0.8rem; color:var(--text-muted);">成为朋友 · 长路漫漫亦灿灿</p>
+      </div>
+    </div>
+  </main>
+
+  <div class="toolbar">
+    <button class="icon-btn" id="themeToggle" aria-label="切换深浅主题"><svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    <button class="icon-btn" id="settingsBtn" aria-label="自定义外观"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div>
+  <div class="panel-backdrop" id="panelBackdrop"></div>
+  <div class="settings-panel" id="settingsPanel">
+    <button class="close-panel" id="closePanel">✕</button>
+    <div class="panel-title">外观定制</div>
+    <div class="option-group">
+      <span class="option-label">字体</span>
+      <div class="option-row" id="fontOptions">
+        <span class="option-chip active" data-font="sans">无衬线</span>
+        <span class="option-chip" data-font="serif">衬线</span>
+        <span class="option-chip" data-font="hand">手写</span>
+      </div>
+    </div>
+    <div class="option-group">
+      <span class="option-label">背景纹理</span>
+      <div class="option-row" id="bgOptions">
+        <span class="option-chip active" data-bg="deep">深邃夜空</span>
+        <span class="option-chip" data-bg="mist">晨雾</span>
+        <span class="option-chip" data-bg="ink">墨迹</span>
+        <span class="option-chip" data-bg="stars">星砂</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      // 纪念日开始: 2025年4月12日
+      const START_DATE = new Date(2025, 3, 12);
+      const MAX_DAYS = 21915; // 60年≈21915天
+      
+      // ---------- 生成丰富里程碑至60年 ----------
+      function buildMilestonesUpTo60Years() {
+        const milestonesSet = new Set();
+        // 原始经典节点
+        const classic = [100, 200, 300, 365, 500, 520, 730, 1000, 1095, 1314];
+        classic.forEach(d => milestonesSet.add(d));
+        
+        // 每100天直到 21900
+        for (let d = 100; d <= MAX_DAYS; d += 100) milestonesSet.add(d);
+        // 每年纪念 (365,730,1095...)
+        for (let y = 1; y <= 60; y++) {
+          let days = Math.floor(y * 365.2422);
+          if (days <= MAX_DAYS) milestonesSet.add(days);
+        }
+        // 半周年+额外重要数字
+        const extra = [77, 188, 222, 333, 444, 555, 666, 777, 888, 999, 1111, 1234, 1500, 1666, 1999, 2025, 2333, 2500, 3000, 3333, 3650, 4000, 4321, 5000, 5555, 6000, 6666, 7300, 7777, 8000, 8888, 9999, 10000, 10950, 12345, 14600, 15000, 18250, 20000, 21000, 21915];
+        extra.forEach(d => { if (d <= MAX_DAYS) milestonesSet.add(d); });
+        
+        // 转为数组并排序
+        let milestones = Array.from(milestonesSet).sort((a,b)=>a-b);
+        return milestones.map(days => ({ days, label: formatMilestoneLabel(days) }));
+      }
+      
+      function formatMilestoneLabel(days) {
+        if (days === 100) return '百日留念';
+        if (days === 200) return '两百日';
+        if (days === 300) return '三百日';
+        if (days === 365) return '一周年 🎂';
+        if (days === 500) return '500天里程碑';
+        if (days === 520) return '520天喽！';
+        if (days === 730) return '两周年 🧡';
+        if (days === 1000) return '千日纪元 ✨';
+        if (days === 1095) return '三周年';
+        if (days === 1314) return '一生一世 1314';
+        if (days === 1500) return '1500日星辰';
+        if (days === 2025) return '相逢2025';
+        if (days === 3000) return '三千日夜';
+        if (days === 3650) return '十年之约 💫';
+        if (days === 5000) return '五千日相知';
+        if (days === 7300) return '廿载时光 (20年)';
+        if (days === 10000) return '万里同行 10000天';
+        if (days === 10950) return '三十周年 🌟';
+        if (days === 14600) return '四十载春秋';
+        if (days === 18250) return '五十年金诺';
+        if (days === 21915) return '六十年·钻石友谊 💎';
+        // 一般年份和百天自动生成
+        if (days % 365 === 0) return `${days/365}周年纪念`;
+        if (days % 100 === 0) return `${days}天纪念`;
+        return `${days}日纪念`;
+      }
+      
+      const MILESTONES = buildMilestonesUpTo60Years();
+      
+      // 显示模式
+      const DISPLAY_MODES = ['days', 'weeks', 'months', 'years'];
+      let currentModeIndex = 0;
+      let rotationIndex = 0;
+      let upcomingMilestones = [];
+      
+      // DOM 元素
+      const daysEl = document.getElementById('daysCount');
+      const unitLabel = document.getElementById('unitLabel');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const progressPercent = document.getElementById('progressPercent');
+      const milestoneAlert = document.getElementById('milestoneAlert');
+      const numberZone = document.getElementById('numberZone');
+      const themeToggle = document.getElementById('themeToggle');
+      const settingsBtn = document.getElementById('settingsBtn');
+      const settingsPanel = document.getElementById('settingsPanel');
+      const panelBackdrop = document.getElementById('panelBackdrop');
+      const closePanel = document.getElementById('closePanel');
+      const htmlEl = document.documentElement;
+      const bodyEl = document.body;
+      
+      function getDaysSince() {
+        const now = new Date();
+        const startDay = new Date(START_DATE.getFullYear(), START_DATE.getMonth(), START_DATE.getDate());
+        const todayDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return Math.floor((todayDay - startDay) / 86400000);
+      }
+      
+      function computeDisplayValues(totalDays) {
+        const years = Math.floor(totalDays / 365.2422);
+        const remainingAfterYears = totalDays % 365.2422;
+        const months = Math.floor(remainingAfterYears / 30.44);
+        const daysRem = Math.floor(remainingAfterYears % 30.44);
+        const weeks = Math.floor(totalDays / 7);
+        const remainingDaysAfterWeeks = totalDays % 7;
+        return { years, months: Math.max(0, months), daysRem, weeks, remainingDaysAfterWeeks };
+      }
+      
+      function updateDisplay() {
+        const totalDays = getDaysSince();
+        if (totalDays < 0) return;
+        
+        const mode = DISPLAY_MODES[currentModeIndex];
+        const vals = computeDisplayValues(totalDays);
+        let displayText = '';
+        let unitText = '';
+        
+        switch(mode) {
+          case 'days': displayText = totalDays; unitText = '天'; break;
+          case 'weeks': 
+            if (vals.remainingDaysAfterWeeks > 0) displayText = `${vals.weeks}周${vals.remainingDaysAfterWeeks}`;
+            else displayText = `${vals.weeks}`;
+            unitText = vals.remainingDaysAfterWeeks > 0 ? '' : '周';
+            break;
+          case 'months':
+            if (vals.daysRem === 0) displayText = `${vals.months}`;
+            else displayText = `${vals.months}月${vals.daysRem}`;
+            unitText = vals.daysRem === 0 ? '个月' : '';
+            break;
+          case 'years':
+            if (vals.years > 0) {
+              if (vals.months === 0 && vals.daysRem === 0) displayText = `${vals.years}`;
+              else if (vals.daysRem === 0) displayText = `${vals.years}年${vals.months}`;
+              else displayText = `${vals.years}年${vals.months}月${vals.daysRem}`;
+            } else displayText = `${vals.months}月${vals.daysRem}`;
+            unitText = vals.years > 0 && vals.months === 0 && vals.daysRem === 0 ? '年' : '';
+            break;
+        }
+        daysEl.textContent = displayText;
+        unitLabel.textContent = unitText;
+        
+        // 动态里程碑
+        upcomingMilestones = MILESTONES.filter(m => m.days > totalDays);
+        const todayMilestone = MILESTONES.find(m => m.days === totalDays);
+        if (todayMilestone) {
+          milestoneAlert.style.display = 'inline-block';
+          milestoneAlert.textContent = `✨ 今日 · ${todayMilestone.label} ✨`;
+        } else milestoneAlert.style.display = 'none';
+        
+        // 进度条基于下一个里程碑
+        if (upcomingMilestones.length > 0) {
+          const nextTarget = upcomingMilestones[0];
+          const prevMilestones = MILESTONES.filter(m => m.days <= totalDays);
+          const prevTargetDays = prevMilestones.length ? prevMilestones[prevMilestones.length-1].days : 0;
+          const stageTotal = nextTarget.days - prevTargetDays;
+          const stageProgress = totalDays - prevTargetDays;
+          const progress = Math.min(100, (stageProgress / stageTotal) * 100);
+          progressBar.style.width = `${progress}%`;
+          progressPercent.textContent = `${Math.floor(progress)}%`;
+        } else {
+          progressBar.style.width = `100%`;
+          progressPercent.textContent = `100%`;
+          progressText.textContent = `长情相伴 · 无限时光`;
+        }
+        // 轮播文本提前准备（异步独立计时）
+      }
+      
+      // 纪念日文本轮播（每4秒）
+      function rotateMilestoneText() {
+        const totalDays = getDaysSince();
+        const upcoming = MILESTONES.filter(m => m.days > totalDays);
+        if (upcoming.length === 0) {
+          progressText.textContent = `友谊跨越六十载 · 永恒回响`;
+          return;
+        }
+        const maxCycle = Math.min(5, upcoming.length);
+        const target = upcoming[rotationIndex % maxCycle];
+        const daysLeft = target.days - totalDays;
+        progressText.style.opacity = '0';
+        progressText.style.transform = 'translateY(-5px)';
+        setTimeout(() => {
+          if (daysLeft === 1) progressText.textContent = `明日就是「${target.label}」`;
+          else progressText.textContent = `距离 ${target.label} 还有 ${daysLeft} 天`;
+          progressText.style.opacity = '1';
+          progressText.style.transform = 'translateY(0)';
+          rotationIndex++;
+        }, 280);
+      }
+      
+      // 切换显示单位动画
+      numberZone.addEventListener('click', (e) => {
+        e.stopPropagation();
+        currentModeIndex = (currentModeIndex + 1) % DISPLAY_MODES.length;
+        numberZone.classList.remove('number-refreshed');
+        void numberZone.offsetWidth;
+        numberZone.classList.add('number-refreshed');
+        setTimeout(() => updateDisplay(), 220);
+      });
+      numberZone.addEventListener('touchstart', function() { this.style.transform = 'scale(0.97)'; }, {passive: true});
+      numberZone.addEventListener('touchend', function() { this.style.transform = 'scale(1)'; });
+      
+      // 主题切换 (修复深浅色背景突变bug)
+      function applyTheme(theme) {
+        htmlEl.classList.remove('theme-dark', 'theme-light');
+        htmlEl.classList.add(`theme-${theme}`);
+        localStorage.setItem('theme', theme);
+        // 同步icon
+        const themeIconSvg = document.getElementById('themeIcon');
+        if (theme === 'light') {
+          themeIconSvg.innerHTML = '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+        } else {
+          themeIconSvg.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        }
+        // 重要: 让当前选中的背景纹理与主题重新匹配（因为背景切换依赖body类+theme类），无需额外刷新，但需确保背景选项高亮同步
+        const currentBg = localStorage.getItem('selectedBg') || 'deep';
+        bodyEl.classList.forEach(cls => { if(cls.startsWith('bg-')) bodyEl.classList.remove(cls); });
+        bodyEl.classList.add(`bg-${currentBg}`);
+      }
+      
+      themeToggle.addEventListener('click', () => {
+        const isLight = htmlEl.classList.contains('theme-light');
+        applyTheme(isLight ? 'dark' : 'light');
+      });
+      
+      // 字体/背景设置
+      function applyFont(font) {
+        const fonts = { sans: '"PingFang SC","Hiragino Sans GB","Noto Sans SC","Microsoft YaHei",-apple-system,sans-serif', serif: 'Georgia,"Times New Roman","Songti SC",serif', hand: '"Comic Sans MS","Brush Script MT","KaiTi",cursive' };
+        bodyEl.style.setProperty('--font-family', fonts[font] || fonts.sans);
+        document.querySelectorAll('#fontOptions .option-chip').forEach(c => c.classList.remove('active'));
+        document.querySelector(`#fontOptions [data-font="${font}"]`)?.classList.add('active');
+      }
+      
+      function applyBackground(bg) {
+        bodyEl.classList.forEach(cls => { if(cls.startsWith('bg-')) bodyEl.classList.remove(cls); });
+        bodyEl.classList.add(`bg-${bg}`);
+        localStorage.setItem('selectedBg', bg);
+        document.querySelectorAll('#bgOptions .option-chip').forEach(c => c.classList.remove('active'));
+        document.querySelector(`#bgOptions [data-bg="${bg}"]`)?.classList.add('active');
+      }
+      
+      function initSettingsUI() {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) applyTheme(savedTheme);
+        else applyTheme(window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        const savedBg = localStorage.getItem('selectedBg');
+        if (savedBg) applyBackground(savedBg);
+        else applyBackground('deep');
+        const savedFont = localStorage.getItem('font');
+        if (savedFont) applyFont(savedFont);
+      }
+      
+      document.getElementById('fontOptions').addEventListener('click', (e) => {
+        if (e.target.classList.contains('option-chip')) {
+          const font = e.target.dataset.font; applyFont(font); localStorage.setItem('font', font);
+        }
+      });
+      document.getElementById('bgOptions').addEventListener('click', (e) => {
+        if (e.target.classList.contains('option-chip')) {
+          const bg = e.target.dataset.bg; applyBackground(bg);
+        }
+      });
+      settingsBtn.addEventListener('click', () => { settingsPanel.classList.add('open'); panelBackdrop.classList.add('active'); });
+      closePanel.addEventListener('click', () => { settingsPanel.classList.remove('open'); panelBackdrop.classList.remove('active'); });
+      panelBackdrop.addEventListener('click', () => { settingsPanel.classList.remove('open'); panelBackdrop.classList.remove('active'); });
+      
+      // 光标光晕
+      const cursorGlow = document.getElementById('cursorGlow');
+      if (cursorGlow && window.matchMedia('(min-width:769px)').matches) {
+        let gx = -200, gy = -200, tx = -200, ty = -200, raf;
+        document.addEventListener('mousemove', e => { tx = e.clientX; ty = e.clientY; if(!raf) raf = requestAnimationFrame(updateGlow); });
+        document.addEventListener('mouseleave', () => { tx = ty = -200; if(!raf) raf = requestAnimationFrame(updateGlow); });
+        function updateGlow() {
+          gx += (tx - gx) * 0.12; gy += (ty - gy) * 0.12;
+          cursorGlow.style.left = gx + 'px'; cursorGlow.style.top = gy + 'px';
+          if (Math.abs(tx-gx)>0.5 || Math.abs(ty-gy)>0.5) raf = requestAnimationFrame(updateGlow);
+          else raf = null;
+        }
+      }
+      
+      // 粒子效果
+      const stage = document.getElementById('particlesStage');
+      for (let i=0; i<(window.innerWidth<600?5:9); i++) {
+        const p = document.createElement('div');
+        p.className = `particle ${Math.random()<0.55?'particle--warm':'particle--pale'}`;
+        const size = 2+Math.random()*4.5;
+        p.style.cssText = `width:${size}px;height:${size}px;left:${8+Math.random()*84}%;top:${10+Math.random()*80}%;animation:${['driftA','driftB','driftC'][Math.floor(Math.random()*3)]} ${6+Math.random()*10}s infinite;animation-delay:-${Math.random()*8}s;`;
+        stage.appendChild(p);
+      }
+      
+      // 启动所有更新（无秒计时器）
+      initSettingsUI();
+      updateDisplay();
+      rotateMilestoneText();
+      setInterval(updateDisplay, 1000);
+      setInterval(rotateMilestoneText, 4200);
+    })();
+  </script>
+</body>
+</html>
